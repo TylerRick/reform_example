@@ -1,4 +1,5 @@
 class AlbumsController < ApplicationController
+  respond_to :js, :html
 
   before_action :find_album,  only: [:show, :edit, :update]
   before_action :build_album, only: [:new, :create]
@@ -18,21 +19,19 @@ class AlbumsController < ApplicationController
   end
 
   def create
-    if @form.validate(params[:album])
-      @form.save
-      redirect_to album_path(@album)
-    else
-      render :new
+    workflow = Workflows::AlbumWorkflow.new(@form, params[:album])
+    workflow.process do |album|
+      return respond_with album
     end
+    render :new
   end
 
   def update
-    if @form.validate(params[:album])
-      @form.save
-      redirect_to album_path(@album)
-    else
-      render :edit
+    workflow = Workflows::AlbumWorkflow.new(@form, params[:album])
+    workflow.process do |album|
+      return respond_with album
     end
+    render :edit
   end
 
 private

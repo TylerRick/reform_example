@@ -15,10 +15,12 @@ module Forms
 
     def save
       super
-      model.save  # Reform actually does this automatically now
-      # But not this (see https://github.com/apotonick/reform/issues/73)
-      songs.each do |song|
-        song.model.save!
+      ::ActiveRecord::Base.transaction do
+        model.save  # Reform actually does this automatically now
+        # But not this (see https://github.com/apotonick/reform/issues/73)
+        songs.each do |song|
+          song.model.save!
+        end
       end
     end
   end
